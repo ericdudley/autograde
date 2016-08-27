@@ -1,4 +1,0 @@
-Functionality, 45
-Design, 15
-Testing, 5
-Style, 5
