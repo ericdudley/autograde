@@ -1,13 +1,36 @@
-import subprocess
+"""
+	autograde is a script intended to help speed up the grading process of python scripts.
+	Features:
+		-Run students' scripts in a subprocess.
+		-Run automated tests.
+		-Output results of automated and manual tests to grades file.
+		-Input file to define automated tests.
+		+Run turtle scripts
+		+Input file to define grading rubric
+	@author Eric Dudley
+"""
+
+import subprocess #Used to run python scripts in isolated environment
 import os
-import tempfile
-import collections
+import tempfile #Safely modify scripts without affecting original
+from collections import OrderedDict #Used to keep rubric and scripts in order or grading
+
+"""
+	Runs a terminal command and returns output.
+"""
 def run_script(input):
 	return subprocess.check_output(input, universal_newlines=True)
 
+"""
+	Runs a terminal command.
+"""
 def run_script_blind(input):
 	return subprocess.call(input)
 	
+"""
+	Reads in custom test cases from input file.
+	Returns them in a dictionary.
+"""
 def getCases(filename):
 	rdict = {}
 	line_separator = "$$$<<<>>>"
@@ -35,6 +58,10 @@ def getCases(filename):
 		elif(next == "output"):
 			output += line+"\n"
 	return rdict
+	
+"""
+	Grades automatically/manually scripts in submissions directory with custom test cases.
+"""
 def grade(auto):
 	subdir = "submissions"
 	case_file = "test_cases.txt"
@@ -61,40 +88,49 @@ def grade(auto):
 				passed = True
 			elif(choice == "n"):
 				passed = False
-	#for each submission
-	#test each testcase, storing results along the way
+
+"""
+	Runs all turtle scripts in current directory and displays scripts in gedit, then allows user to grade each part of the rubric.
+"""
 def turtle_grade():
 	grades = collections.OrderedDict()
-	print("Running all turtle files...")
 	count = 0
+	print("Running all turtle files...")
 	for(dir, sub_dir, files) in os.walk("."):
 		for filename in files:
-			if(filename.endswith(".py") and ("import turtle" in open(filename).read() or "from turtle" in open(filename).read()) and filename != "autograde.py"):
+			if( filename.endswith(".py") and #python script
+			("import turtle" in open(filename).read() or "from turtle" in open(filename).read()) and #implements turtle 
+			filename != "autograde.py"): #not itself
 				count+=1
 				print(filename)
+				
 				filei = open(filename, "r")
-				rewrite = ""
+				rewrite = "" #Rewrite the file line by line. Try to insert helpful lines.
 				turtle_name = "turtle"
 				for line in filei:
 					if "import turtle" in line or "from turtle import" in line:
-						if "import turtle as" in line:
+						if "import turtle as" in line: #Account for shortnames for turtle
 							turtle_name = line.split(" ")[3].strip()
-						line += turtle_name+".speed(0)\n"
+						line += turtle_name+".speed(0)\n" #Set turtle to max speed
 					if turtle_name+".done()" in line:
-						line = line.replace(".done()", ".exitonclick()")
+						line = line.replace(".done()", ".exitonclick()") #Enable click to exit
 					rewrite += line	
 				if ".exitonclick()" not in rewrite:
-					rewrite += turtle_name+".exitonclick()"
+					rewrite += turtle_name+".exitonclick()" #Add to end of script if not anywhere else
 				filei.close()
+				
 				fileo = tempfile.NamedTemporaryFile(mode="w", delete=False);
-				fileo.write(rewrite)
+				fileo.write(rewrite) #Create temporary file for modified script
 				fileo.close()
+				
 				run_script_blind(["python3", fileo.name])
-				os.remove(fileo.name)
+				os.remove(fileo.name) #Delete temporary file
 				print("Opening code")
-				os.system('gedit "'+filename+'"')
+				os.system('gedit "'+filename+'"') #Open original script in gedit
+				
+				#Get user input to grade everything on rubric
 				grades[filename] = collections.OrderedDict()
-				gguidef = open("grading_guide.txt", "r")
+				gguidef = open("grading_rubric.txt", "r")
 				for line in gguidef:
 					line = line.strip()
 					elems = line.split(",")
@@ -105,19 +141,20 @@ def turtle_grade():
 						grades[filename][elems[0]]["max"] = int(elems[1])
 						grades[filename][elems[0]]["earned"] = int(input(elems[0]+"[0-"+elems[1]+"]: "))
 				gguidef.close()
+
 	out_str = ""
 	if count == 0:
 		print("No turtle files in current directory!")
 		return
-	for key in grades.keys():
+	for key in grades.keys(): #For each student
 		if len(key.split("-")) > 2:
 			out_str += key.split("-")[2].strip()
 		else:
 			out_str += key.strip()
 		out_str += "\n"
-		overall = 0
-		max_overall = 0
-		for cat in grades[key].keys():
+		overall = 0 #Total points
+		max_overall = 0 #Maximum possible total points
+		for cat in grades[key].keys(): #For each part of rubric
 			out_str += "   "+cat+": "+str(grades[key][cat]["earned"])+"/"+str(grades[key][cat]["max"])+"\n"
 			overall += grades[key][cat]["earned"]
 			max_overall += grades[key][cat]["max"]
@@ -128,10 +165,18 @@ def turtle_grade():
 	outfile.write(out_str)
 	outfile.close()
 	print("Grading completed.")
+	
+"""
+	Outputs turtle grades, the turtle grading process must be done first.
+"""
 def print_turtle_grades():
 	ifile = open("turtle_grades.txt", "r")
 	for line in ifile:
 		print(line)
+
+"""
+	Output grades to a grades file.
+"""
 def gen_output():
 	print("Outputting to outputs.txt...")
 	out_str = ""
@@ -143,24 +188,30 @@ def gen_output():
 	outfile = open("outputs.txt", "w")
 	outfile.write(out_str)
 	outfile.close()
+	
+"""
+	Handles menu navigation.
+"""
 def main():
 	print("Welcome to autograder!")
-	#run_script(["python", "test.py","Kevin"])
 	while(True):
 		print("Please choose an action...")
-		print("[1] Autograde\n[2] Manugrade\n[3] Generate output\n[4] Turtlegrade\n[5] Print turtle grades\n[q] Quit")
+		print("[1] Autograde(dummy)\n[2] Manugrade(dummy)\n[3] Generate output(dummy)\n[4] Turtlegrade\n[5] Print turtle grades\n[q] Quit")
 		choice = input(">>>")
-		if(choice == "1"):
-			grade(True)
-		elif(choice == "2"):
-			grade(False)
-		elif(choice == "3"):
-			gen_output()
-		elif(choice == "4"):
+		if(choice == "1"): #Autograde
+			#grade(True)
+            print("In development.")
+		elif(choice == "2"): #Manugrade
+			#grade(False)
+            print("In development.")
+		elif(choice == "3"): #Generate output
+			#gen_output()
+            print("In development.")
+		elif(choice == "4"): #Turtlegrade
 			turtle_grade()
-		elif(choice == "5"):
+		elif(choice == "5"): #Print turtle grades
 			print_turtle_grades()
-		elif(choice == "q"):
+		elif(choice == "q"): #Quit
 			break
 
 main()
