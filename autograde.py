@@ -217,9 +217,12 @@ def main():
 		elif(choice == "q"): #Quit
 			break
 
+#Linux/Unix environment
 os_python = "python3"
 os_editor = "gedit"
-if os.name == "nt":
+
+#Windows environment
+if os.name == "nt": 
 	os_python = "python"
 	os_editor = "C:\\Python34\\Lib\\idlelib\\idle.py"
 main()
