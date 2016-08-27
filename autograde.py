@@ -7,6 +7,10 @@
 		-Input file to define automated tests.
 		+Run turtle scripts
 		+Input file to define grading rubric
+	Requirements:
+		-Meant to be run on RIT unix CS machines or any other linux system.
+		-Python 3
+		-gedit
 	@author Eric Dudley
 """
 
@@ -93,7 +97,7 @@ def grade(auto):
 	Runs all turtle scripts in current directory and displays scripts in gedit, then allows user to grade each part of the rubric.
 """
 def turtle_grade():
-	grades = collections.OrderedDict()
+	grades = OrderedDict()
 	count = 0
 	print("Running all turtle files...")
 	for(dir, sub_dir, files) in os.walk("."):
@@ -123,20 +127,19 @@ def turtle_grade():
 				fileo.write(rewrite) #Create temporary file for modified script
 				fileo.close()
 				
-				run_script_blind(["python3", fileo.name])
+				run_script_blind([os_python, fileo.name])
 				os.remove(fileo.name) #Delete temporary file
 				print("Opening code")
-				os.system('gedit "'+filename+'"') #Open original script in gedit
+				os.system(os_editor+' "'+filename+'"') #Open original script in gedit
 				
 				#Get user input to grade everything on rubric
-				grades[filename] = collections.OrderedDict()
+				grades[filename] = OrderedDict()
 				gguidef = open("grading_rubric.txt", "r")
 				for line in gguidef:
 					line = line.strip()
 					elems = line.split(",")
-					if len(elems) == 2 and elems[0].lower() != "overall":
-						elems[0] = elems[0].strip()
-						elems[1] = elems[1].strip()
+					if len(elems) == 2:
+						elems = [ elem.strip() for elem in elems]
 						grades[filename][elems[0]] = {}
 						grades[filename][elems[0]]["max"] = int(elems[1])
 						grades[filename][elems[0]]["earned"] = int(input(elems[0]+"[0-"+elems[1]+"]: "))
@@ -200,13 +203,13 @@ def main():
 		choice = input(">>>")
 		if(choice == "1"): #Autograde
 			#grade(True)
-            print("In development.")
+			print("In development.")
 		elif(choice == "2"): #Manugrade
 			#grade(False)
-            print("In development.")
+			print("In development.")
 		elif(choice == "3"): #Generate output
 			#gen_output()
-            print("In development.")
+			print("In development.")
 		elif(choice == "4"): #Turtlegrade
 			turtle_grade()
 		elif(choice == "5"): #Print turtle grades
@@ -214,4 +217,9 @@ def main():
 		elif(choice == "q"): #Quit
 			break
 
+os_python = "python3"
+os_editor = "gedit"
+if os.name == "nt":
+	os_python = "python"
+	os_editor = "C:\\Python34\\Lib\\idlelib\\idle.py"
 main()

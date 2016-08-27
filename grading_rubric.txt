@@ -1,3 +1,6 @@
+#Grading rubric for autograde.py
+#Each line represents a section that should be graded.
+#The left of the comma is the name of the section and the right is the maximum number of points.
 Functionality, 45
 Design, 15
 Testing, 5
