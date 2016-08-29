@@ -151,7 +151,7 @@ def turtle_grade():
 				cases = getTurtleCases("turtle_cases.txt")
 				if(len(cases) > 0):
 					for case in cases:
-						run_script_blind([os_python, fileo.name], cases[case])
+						run_script_blind([os_python, fileo.name], cases[case]+["y"]) #Temporary fix
 				else:
 					run_script_blind([os_python, fileo.name], ["y"]) #Temporary fix
 				os.remove(fileo.name) #Delete temporary file
