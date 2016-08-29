@@ -28,8 +28,15 @@ def run_script(input):
 """
 	Runs a terminal command.
 """
-def run_script_blind(input):
-	return subprocess.call(input)
+def run_script_blind(input, stdinstrs):
+	p = subprocess.Popen(input, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+	if(len(stdinstrs) > 0):
+		comstr = ""
+		for string in stdinstrs:
+			comstr += string+"\n"
+		p.communicate(comstr)
+	print(p.communicate())
+	#return subprocess.call(input)
 	
 """
 	Reads in custom test cases from input file.
@@ -62,7 +69,21 @@ def getCases(filename):
 		elif(next == "output"):
 			output += line+"\n"
 	return rdict
-	
+
+"""
+	Builds a dictionary of test cases for turtle.
+"""
+def getTurtleCases(filename):
+	rdict  = OrderedDict()
+	count = 0
+	for line in open(filename, "r"):
+		line = line.strip()
+		if(line == ""): continue
+		elems = line.split(",")
+		elems = [elem.strip() for elem in elems]
+		rdict["Test "+str(count)] = elems
+		count+=1
+	return rdict
 """
 	Grades automatically/manually scripts in submissions directory with custom test cases.
 """
@@ -127,7 +148,12 @@ def turtle_grade():
 				fileo.write(rewrite) #Create temporary file for modified script
 				fileo.close()
 				
-				run_script_blind([os_python, fileo.name])
+				cases = getTurtleCases("turtle_cases.txt")
+				if(len(cases) > 0):
+					for case in cases:
+						run_script_blind([os_python, fileo.name], cases[case])
+				else:
+					run_script_blind([os_python, fileo.name], ["y"]) #Temporary fix
 				os.remove(fileo.name) #Delete temporary file
 				print("Opening code")
 				os.system(os_editor+' "'+filename+'"') #Open original script in gedit
