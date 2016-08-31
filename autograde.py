@@ -29,14 +29,14 @@ def run_script(input):
 	Runs a terminal command.
 """
 def run_script_blind(input, stdinstrs):
-	p = subprocess.Popen(input, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+	"""p = subprocess.Popen(input, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 	if(len(stdinstrs) > 0):
 		comstr = ""
 		for string in stdinstrs:
 			comstr += string+"\n"
 		p.communicate(comstr)
-	print(p.communicate())
-	#return subprocess.call(input)
+	print(p.communicate())"""
+	return subprocess.call(input)
 	
 """
 	Reads in custom test cases from input file.
@@ -170,6 +170,7 @@ def turtle_grade():
 						grades[filename][elems[0]]["max"] = int(elems[1])
 						grades[filename][elems[0]]["earned"] = int(input(elems[0]+"[0-"+elems[1]+"]: "))
 				gguidef.close()
+				grades[filename]["comments"] = input("Comments: ")
 
 	out_str = ""
 	if count == 0:
@@ -184,6 +185,9 @@ def turtle_grade():
 		overall = 0 #Total points
 		max_overall = 0 #Maximum possible total points
 		for cat in grades[key].keys(): #For each part of rubric
+			if cat == "comments":
+				out_str += "Comments: "+grades[key][cat]+"\n"
+				continue
 			out_str += "   "+cat+": "+str(grades[key][cat]["earned"])+"/"+str(grades[key][cat]["max"])+"\n"
 			overall += grades[key][cat]["earned"]
 			max_overall += grades[key][cat]["max"]
