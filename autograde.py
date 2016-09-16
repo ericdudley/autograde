@@ -29,14 +29,14 @@ def run_script(input):
 	Runs a terminal command.
 """
 def run_script_blind(input, stdinstrs):
-	"""p = subprocess.Popen(input, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+	p = subprocess.Popen(input, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 	if(len(stdinstrs) > 0):
 		comstr = ""
 		for string in stdinstrs:
 			comstr += string+"\n"
 		p.communicate(comstr)
-	print(p.communicate())"""
-	return subprocess.call(input)
+	print(p.communicate())
+	#return subprocess.call(input)
 	
 """
 	Reads in custom test cases from input file.
@@ -149,6 +149,7 @@ def turtle_grade():
 				fileo.close()
 				
 				cases = getTurtleCases("turtle_cases.txt")
+				print(cases)
 				if(len(cases) > 0):
 					for case in cases:
 						run_script_blind([os_python, fileo.name], cases[case]+["y"]) #Temporary fix
@@ -168,7 +169,16 @@ def turtle_grade():
 						elems = [ elem.strip() for elem in elems]
 						grades[filename][elems[0]] = {}
 						grades[filename][elems[0]]["max"] = int(elems[1])
-						grades[filename][elems[0]]["earned"] = int(input(elems[0]+"[0-"+elems[1]+"]: "))
+						invalidNum = True
+						while(invalidNum):
+							try:
+								innum = int(input(elems[0]+"[0-"+elems[1]+"]: "))
+								if(innum < 0 or innum > int(elems[1])):
+									continue
+								invalidNum = False
+								grades[filename][elems[0]]["earned"] = innum
+							except ValueError:
+								continue
 				gguidef.close()
 				grades[filename]["comments"] = input("Comments: ")
 
