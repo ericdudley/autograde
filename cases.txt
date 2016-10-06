@@ -1,0 +1,18 @@
+Example input
+Two lines
+|
+Expected output
+Multiple lines
+$END$
+
+Another line
+of 
+input
+|
+Output
+$END$
+
+Single input
+|
+Single output
+$END$
